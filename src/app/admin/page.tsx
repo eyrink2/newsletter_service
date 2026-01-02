@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
-import { startNewIssue, getIssues, getSubscriberCount } from './actions';
+import { startNewIssue, getIssues, getSubscriberCount, compileNewsletter } from './actions';
 
 interface Issue {
   id: string;
@@ -16,6 +16,13 @@ export default function AdminDashboard() {
   const [subscriberCount, setSubscriberCount] = useState(0);
   const [isPending, startTransition] = useTransition();
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [compilingIssueId, setCompilingIssueId] = useState<string | null>(null);
+  const [compileResult, setCompileResult] = useState<{
+    intro?: string;
+    outro?: string;
+    originalSubmissions?: Array<{ name: string; answers: string[]; image_urls: string[] }>;
+    error?: string;
+  } | null>(null);
 
   useEffect(() => {
     loadData();
@@ -41,6 +48,35 @@ export default function AdminDashboard() {
       if (result.success) {
         await loadData();
       }
+    });
+  }
+
+  async function handleCompileNewsletter(issueId: string) {
+    setCompilingIssueId(issueId);
+    setCompileResult(null);
+    setMessage(null);
+    
+    startTransition(async () => {
+      const result = await compileNewsletter(issueId);
+      
+      if (result.success) {
+        setCompileResult({
+          intro: result.intro,
+          outro: result.outro,
+          originalSubmissions: result.originalSubmissions
+        });
+        setMessage({
+          type: 'success',
+          text: 'Newsletter compiled successfully!'
+        });
+      } else {
+        setMessage({
+          type: 'error',
+          text: result.error || 'Failed to compile newsletter'
+        });
+      }
+      
+      setCompilingIssueId(null);
     });
   }
 
@@ -146,7 +182,7 @@ export default function AdminDashboard() {
               {issues.map((issue) => (
                 <li key={issue.id} className="px-6 py-4 hover:bg-gray-50">
                   <div className="flex items-center justify-between">
-                    <div>
+                    <div className="flex-1">
                       <p className="text-sm font-medium text-gray-900">
                         Issue created {formatDate(issue.created_at)}
                       </p>
@@ -154,11 +190,57 @@ export default function AdminDashboard() {
                         Deadline: {formatDate(issue.deadline)}
                       </p>
                     </div>
-                    {getStatusBadge(issue.status, issue.deadline)}
+                    <div className="flex items-center gap-3">
+                      {getStatusBadge(issue.status, issue.deadline)}
+                      <button
+                        onClick={() => handleCompileNewsletter(issue.id)}
+                        disabled={compilingIssueId === issue.id || isPending}
+                        className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {compilingIssueId === issue.id ? (
+                          <>
+                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Compiling...
+                          </>
+                        ) : (
+                          'Compile Newsletter'
+                        )}
+                      </button>
+                    </div>
                   </div>
                   <div className="mt-2">
                     <p className="text-xs text-gray-400">ID: {issue.id}</p>
                   </div>
+                  {compileResult && compilingIssueId === null && (
+                    <div className="mt-4 p-4 bg-gray-50 rounded-md">
+                      <h4 className="text-sm font-semibold text-gray-900 mb-2">Compiled Newsletter:</h4>
+                      <div className="space-y-3">
+                        <div>
+                          <p className="text-xs font-medium text-gray-600 mb-1">Intro:</p>
+                          <p className="text-sm text-gray-800">{compileResult.intro}</p>
+                        </div>
+                        <div>
+                          <p className="text-xs font-medium text-gray-600 mb-1">Outro:</p>
+                          <p className="text-sm text-gray-800">{compileResult.outro}</p>
+                        </div>
+                        {compileResult.originalSubmissions && (
+                          <div>
+                            <p className="text-xs font-medium text-gray-600 mb-1">
+                              Submissions ({compileResult.originalSubmissions.length}):
+                            </p>
+                            <ul className="text-xs text-gray-600 space-y-1">
+                              {compileResult.originalSubmissions.map((sub, idx) => (
+                                <li key={idx}>• {sub.name}: {sub.answers.length} answers</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
                 </li>
               ))}
             </ul>

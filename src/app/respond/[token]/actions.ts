@@ -45,6 +45,19 @@ export async function validateMagicToken(
       };
     }
 
+    // Check if deadline has passed
+    const issueDeadline = new Date(issue.deadline);
+    const now = new Date();
+    if (issueDeadline < now) {
+      return {
+        valid: true,
+        subscriber: subscriber as Subscriber,
+        issue: issue as Issue,
+        alreadySubmitted: false
+        // Note: deadlinePassed will be checked in the UI component
+      };
+    }
+
     // Check if already submitted
     const { data: existingSubmission } = await supabaseAdmin
       .from('submissions')
@@ -180,14 +193,14 @@ export async function uploadImage(
     const extension = file.name.split('.').pop();
     const filename = `${issueId}/${subscriberId}/${timestamp}.${extension}`;
 
-    // Convert File to ArrayBuffer then to Buffer for upload
+    // Convert File to ArrayBuffer for upload
     const arrayBuffer = await file.arrayBuffer();
-    const buffer = Buffer.from(arrayBuffer);
+    const uint8Array = new Uint8Array(arrayBuffer);
 
     // Upload to Supabase Storage
     const { error: uploadError } = await supabaseAdmin.storage
       .from(BUCKET_NAME)
-      .upload(filename, buffer, {
+      .upload(filename, uint8Array, {
         contentType: file.type,
         upsert: false
       });
