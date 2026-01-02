@@ -1,0 +1,1 @@
+custom newsletter service for friends
