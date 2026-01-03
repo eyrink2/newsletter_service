@@ -24,9 +24,34 @@ interface StartNewIssueResult {
 
 export async function startNewIssue(): Promise<StartNewIssueResult> {
   try {
-    // Calculate deadline (48 hours from now)
-    const deadline = new Date();
-    deadline.setHours(deadline.getHours() + 48);
+    // Calculate deadline: midnight Pacific Time, 2 days from today
+    const now = new Date();
+    
+    // Get current date in Pacific Time
+    const pacificNow = new Date(now.toLocaleString('en-US', { timeZone: 'America/Los_Angeles' }));
+    
+    // Add 2 days
+    const twoDaysLater = new Date(pacificNow);
+    twoDaysLater.setDate(twoDaysLater.getDate() + 2);
+    
+    // Set to midnight (00:00:00) Pacific Time
+    twoDaysLater.setHours(0, 0, 0, 0);
+    
+    // Get date components (year, month, day) in Pacific Time
+    const year = twoDaysLater.getFullYear();
+    const month = twoDaysLater.getMonth() + 1; // 1-12
+    const day = twoDaysLater.getDate();
+    
+    // Determine if DST (Daylight Saving Time) - roughly March to November
+    // DST in US typically: 2nd Sunday in March to 1st Sunday in November
+    // For simplicity, we'll use March-November as DST period
+    const isDST = month >= 3 && month <= 11;
+    const ptOffsetHours = isDST ? 7 : 8; // PDT is UTC-7, PST is UTC-8 (offset from UTC)
+    
+    // Create deadline at midnight PT, converted to UTC
+    // If it's midnight PT (00:00), in UTC it's 08:00 (PST) or 07:00 (PDT) the same day
+    // So we add the offset hours to get UTC time
+    const deadline = new Date(Date.UTC(year, month - 1, day, ptOffsetHours, 0, 0));
 
     // Create a new issue
     const { data: issue, error: issueError } = await supabaseAdmin

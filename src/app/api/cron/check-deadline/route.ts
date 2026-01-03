@@ -2,27 +2,6 @@ import { NextResponse } from 'next/server';
 import { finalizeAndSendNewsletter } from '@/app/admin/actions';
 import { supabaseAdmin } from '@/lib/supabase';
 
-/**
- * Vercel Cron Job: Check Deadline
- * 
- * This endpoint should be called by Vercel Cron Jobs to automatically
- * finalize and send newsletters when their deadline has passed.
- * 
- * Setup in vercel.json:
- * {
- *   "crons": [{
- *     "path": "/api/cron/check-deadline",
- *     "schedule": "0 */6 * * *"  // Every 6 hours
- *   }]
- * }
- * 
- * Or configure in Vercel Dashboard:
- * - Go to Project Settings → Cron Jobs
- * - Add new cron job
- * - Path: /api/cron/check-deadline
- * - Schedule: 0 */6 * * * (every 6 hours) or 0 * * * * (every hour)
- */
-
 export async function GET(request: Request) {
   // Verify the request is from Vercel Cron (optional but recommended)
   const authHeader = request.headers.get('authorization');
