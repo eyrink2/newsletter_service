@@ -99,7 +99,10 @@ export async function startNewIssue(): Promise<StartNewIssueResult> {
     }
 
     // Get the app URL from environment
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    // For Vercel: Use your production domain (e.g., https://your-project.vercel.app)
+    // Vercel also provides VERCEL_URL automatically, but NEXT_PUBLIC_APP_URL is more reliable
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 
+                   (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000');
 
     // Send emails to all subscribers
     let emailsSent = 0;
