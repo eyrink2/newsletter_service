@@ -133,7 +133,7 @@ export async function startNewIssue(): Promise<StartNewIssueResult> {
                 })}
               </p>
               <a href="${magicLink}"
-                 style="display: inline-block; background-color: #3b82f6; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 16px;">
+                 style="display: inline-block; background-color: #5d888e; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin-top: 16px;">
                 Submit Your Update
               </a>
               <p style="color: #999; font-size: 14px; margin-top: 24px;">

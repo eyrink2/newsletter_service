@@ -213,10 +213,10 @@ export default function RespondPage() {
   }
 
   function getCharacterCountColor(length: number) {
-    if (length === 0) return 'text-gray-400';
-    if (length < MIN_LENGTH) return 'text-orange-500';
-    if (length > MAX_LENGTH) return 'text-red-500';
-    return 'text-green-600';
+    if (length === 0) return '#999999';
+    if (length < MIN_LENGTH) return '#f97316';
+    if (length > MAX_LENGTH) return '#dc2626';
+    return '#10b981';
   }
 
   function isFormValid() {
@@ -225,23 +225,23 @@ export default function RespondPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FFFBF1', fontFamily: 'Georgia, serif' }}>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2" style={{ borderColor: '#5d888e' }}></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
-          <div className="text-red-500 mb-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FFFBF1', fontFamily: 'Georgia, serif' }}>
+        <div className="rounded-lg shadow-lg p-8 max-w-md text-center" style={{ backgroundColor: '#FFFFFF', borderRadius: '16px' }}>
+          <div className="mb-4" style={{ color: '#dc2626' }}>
             <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">Oops!</h1>
-          <p className="text-gray-600">{error}</p>
+          <h1 className="text-xl font-semibold mb-2" style={{ color: '#1a1a1a' }}>Oops!</h1>
+          <p style={{ color: '#666666' }}>{error}</p>
         </div>
       </div>
     );
@@ -249,15 +249,15 @@ export default function RespondPage() {
 
   if (alreadySubmitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
-          <div className="text-green-500 mb-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FFFBF1', fontFamily: 'Georgia, serif' }}>
+        <div className="rounded-lg shadow-lg p-8 max-w-md text-center" style={{ backgroundColor: '#FFFFFF', borderRadius: '16px' }}>
+          <div className="mb-4" style={{ color: '#10b981' }}>
             <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">Already Submitted</h1>
-          <p className="text-gray-600">
+          <h1 className="text-xl font-semibold mb-2" style={{ color: '#1a1a1a' }}>Already Submitted</h1>
+          <p style={{ color: '#666666' }}>
             You&apos;ve already submitted your response for this issue. Thank you for participating!
           </p>
         </div>
@@ -267,15 +267,15 @@ export default function RespondPage() {
 
   if (submitted) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md text-center">
-          <div className="text-green-500 mb-4">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FFFBF1', fontFamily: 'Georgia, serif' }}>
+        <div className="rounded-lg shadow-lg p-8 max-w-md text-center" style={{ backgroundColor: '#FFFFFF', borderRadius: '16px' }}>
+          <div className="mb-4" style={{ color: '#10b981' }}>
             <svg className="w-16 h-16 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
           </div>
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">Thank You!</h1>
-          <p className="text-gray-600">{submitMessage}</p>
+          <h1 className="text-xl font-semibold mb-2" style={{ color: '#1a1a1a' }}>Thank You!</h1>
+          <p style={{ color: '#666666' }}>{submitMessage}</p>
         </div>
       </div>
     );
@@ -283,16 +283,16 @@ export default function RespondPage() {
 
   if (deadlinePassed) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-100 to-pink-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md text-center">
+      <div className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#FFFBF1', fontFamily: 'Georgia, serif' }}>
+        <div className="rounded-2xl shadow-xl p-8 max-w-md text-center" style={{ backgroundColor: '#FFFFFF', borderRadius: '16px' }}>
           <div className="text-6xl mb-4">
             🐢
           </div>
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Too Late!</h1>
-          <p className="text-gray-600 mb-4">
+          <h1 className="text-2xl font-bold mb-2" style={{ color: '#1a1a1a' }}>Too Late!</h1>
+          <p className="mb-4" style={{ color: '#666666' }}>
             Oh no! The deadline for this issue has already passed.
           </p>
-          <p className="text-gray-500 text-sm">
+          <p className="text-sm" style={{ color: '#999999' }}>
             Don&apos;t worry, there&apos;s always next time! Keep an eye on your inbox for the next newsletter.
           </p>
           <div className="mt-6 text-4xl">
@@ -304,16 +304,16 @@ export default function RespondPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: '#FFFBF1', fontFamily: 'Georgia, serif' }}>
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-          <div className="bg-blue-600 px-6 py-8 text-white">
+        <div className="rounded-lg shadow-lg overflow-hidden" style={{ backgroundColor: '#FFFFFF', borderRadius: '16px' }}>
+          <div className="px-6 py-8 text-white" style={{ backgroundColor: '#5d888e' }}>
             <h1 className="text-2xl font-bold">Hey {subscriber?.name}!</h1>
-            <p className="mt-2 opacity-90">
+            <p className="mt-2" style={{ opacity: 0.9 }}>
               Share your update for this week&apos;s newsletter
             </p>
             {issue && (
-              <p className="mt-4 text-sm opacity-75">
+              <p className="mt-4 text-sm" style={{ opacity: 0.75 }}>
                 Deadline: {formatDeadline(issue.deadline)}
               </p>
             )}
@@ -324,7 +324,8 @@ export default function RespondPage() {
               <div key={index}>
                 <label
                   htmlFor={`question-${index}`}
-                  className="block text-sm font-medium text-gray-700 mb-2"
+                  className="block text-sm font-medium mb-2"
+                  style={{ color: '#1a1a1a' }}
                 >
                   {question}
                 </label>
@@ -336,10 +337,13 @@ export default function RespondPage() {
                   minLength={MIN_LENGTH}
                   maxLength={MAX_LENGTH}
                   required
-                  className="block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-3 border"
+                  className="block w-full rounded-md shadow-sm sm:text-sm p-3 border"
+                  style={{ borderColor: '#E5E5E5' }}
+                  onFocus={(e) => e.currentTarget.style.borderColor = '#5d888e'}
+                  onBlur={(e) => e.currentTarget.style.borderColor = '#E5E5E5'}
                   placeholder="Share your thoughts (2-5 sentences)..."
                 />
-                <div className={`mt-1 text-xs ${getCharacterCountColor(answers[index]?.length || 0)}`}>
+                <div className="mt-1 text-xs" style={{ color: getCharacterCountColor(answers[index]?.length || 0) }}>
                   {answers[index]?.length || 0} / {MAX_LENGTH} characters
                   {(answers[index]?.length || 0) < MIN_LENGTH && (
                     <span className="ml-2">(minimum {MIN_LENGTH})</span>
@@ -350,7 +354,7 @@ export default function RespondPage() {
 
             {/* Image Upload Section */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+              <label className="block text-sm font-medium mb-2" style={{ color: '#1a1a1a' }}>
                 Add Photos (optional, max {MAX_IMAGES})
               </label>
 
@@ -402,14 +406,17 @@ export default function RespondPage() {
                   />
                   <label
                     htmlFor="image-upload"
-                    className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 cursor-pointer"
+                    className="inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium cursor-pointer"
+                    style={{ borderColor: '#E5E5E5', color: '#1a1a1a', backgroundColor: '#FFFFFF' }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FAFAFA'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
                   >
-                    <svg className="w-5 h-5 mr-2 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ color: '#999999' }}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                     Add Photos
                   </label>
-                  <p className="mt-2 text-xs text-gray-500">
+                  <p className="mt-2 text-xs" style={{ color: '#999999' }}>
                     JPEG, PNG, GIF, or WebP. Max 10MB each.
                   </p>
                 </div>
@@ -417,7 +424,7 @@ export default function RespondPage() {
             </div>
 
             {submitMessage && !submitted && (
-              <div className="p-4 rounded-md bg-red-50 text-red-800 border border-red-200">
+              <div className="p-4 rounded-md border" style={{ backgroundColor: '#fee2e2', color: '#991b1b', borderColor: '#fecaca' }}>
                 {submitMessage}
               </div>
             )}
@@ -425,7 +432,11 @@ export default function RespondPage() {
             <button
               type="submit"
               disabled={isPending || !isFormValid() || images.some(img => img.uploading)}
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ backgroundColor: '#5d888e' }}
+              onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#4a6d72')}
+              onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#5d888e')}
+              onFocus={(e) => e.currentTarget.style.outlineColor = '#5d888e'}
             >
               {isPending ? (
                 <>

@@ -133,7 +133,7 @@ export default function AdminDashboard() {
 
     if (status === 'sent') {
       return (
-        <span className="px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
+        <span className="px-2 py-1 text-xs font-medium rounded-full" style={{ backgroundColor: '#d1fae5', color: '#065f46' }}>
           Sent
         </span>
       );
@@ -141,40 +141,43 @@ export default function AdminDashboard() {
 
     if (isExpired) {
       return (
-        <span className="px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
+        <span className="px-2 py-1 text-xs font-medium rounded-full" style={{ backgroundColor: '#fef3c7', color: '#92400e' }}>
           Deadline Passed
         </span>
       );
     }
 
     return (
-      <span className="px-2 py-1 text-xs font-medium rounded-full bg-blue-100 text-blue-800">
+      <span className="px-2 py-1 text-xs font-medium rounded-full" style={{ backgroundColor: '#dbeafe', color: '#5d888e' }}>
         Collecting
       </span>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen" style={{ backgroundColor: '#FFFBF1', fontFamily: 'Georgia, serif' }}>
       <div className="max-w-4xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Creator Dashboard</h1>
-          <p className="mt-2 text-gray-600">
+          <h1 className="text-3xl font-bold" style={{ color: '#1a1a1a' }}>Creator Dashboard</h1>
+          <p className="mt-2" style={{ color: '#666666' }}>
             Manage your group newsletter issues
           </p>
         </div>
 
         {/* Stats */}
-        <div className="bg-white rounded-lg shadow p-6 mb-8">
+        <div className="rounded-lg shadow p-6 mb-8" style={{ backgroundColor: '#FFFFFF', borderRadius: '16px' }}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-500">Total Subscribers</p>
-              <p className="mt-1 text-3xl font-semibold text-gray-900">{subscriberCount}</p>
+              <p className="text-sm font-medium" style={{ color: '#666666' }}>Total Subscribers</p>
+              <p className="mt-1 text-3xl font-semibold" style={{ color: '#1a1a1a' }}>{subscriberCount}</p>
             </div>
             <button
               onClick={handleStartNewIssue}
               disabled={isPending}
-              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{ backgroundColor: '#5d888e' }}
+              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a6d72'}
+              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5d888e'}
             >
               {isPending ? (
                 <>
@@ -194,36 +197,39 @@ export default function AdminDashboard() {
         {/* Message */}
         {message && (
           <div
-            className={`mb-6 p-4 rounded-md ${
-              message.type === 'success'
-                ? 'bg-green-50 text-green-800 border border-green-200'
-                : 'bg-red-50 text-red-800 border border-red-200'
-            }`}
+            className="mb-6 p-4 rounded-md"
+            style={{
+              backgroundColor: message.type === 'success' ? '#d1fae5' : '#fee2e2',
+              color: message.type === 'success' ? '#065f46' : '#991b1b',
+              borderColor: message.type === 'success' ? '#a7f3d0' : '#fecaca',
+              borderWidth: '1px',
+              borderStyle: 'solid'
+            }}
           >
             {message.text}
           </div>
         )}
 
         {/* Issues List */}
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-medium text-gray-900">Issues</h2>
+        <div className="rounded-lg shadow overflow-hidden" style={{ backgroundColor: '#FFFFFF', borderRadius: '16px' }}>
+          <div className="px-6 py-4 border-b" style={{ borderColor: '#E5E5E5' }}>
+            <h2 className="text-lg font-medium" style={{ color: '#1a1a1a' }}>Issues</h2>
           </div>
 
           {issues.length === 0 ? (
-            <div className="px-6 py-12 text-center text-gray-500">
+            <div className="px-6 py-12 text-center" style={{ color: '#666666' }}>
               No issues yet. Click &quot;Start New Issue&quot; to create your first newsletter!
             </div>
           ) : (
-            <ul className="divide-y divide-gray-200">
+            <ul className="divide-y" style={{ borderColor: '#E5E5E5' }}>
               {issues.map((issue) => (
-                <li key={issue.id} className="px-6 py-4 hover:bg-gray-50">
+                <li key={issue.id} className="px-6 py-4" style={{ transition: 'background-color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FAFAFA'} onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}>
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium" style={{ color: '#1a1a1a' }}>
                         Issue created {formatDate(issue.created_at)}
                       </p>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm" style={{ color: '#666666' }}>
                         Deadline: {formatDate(issue.deadline)}
                       </p>
                     </div>
@@ -231,11 +237,15 @@ export default function AdminDashboard() {
                       {getStatusBadge(issue.status, issue.deadline)}
                       {issue.status === 'collecting' && (
                         <>
-                          <button
-                            onClick={() => handleCompileNewsletter(issue.id)}
-                            disabled={compilingIssueId === issue.id || isPending}
-                            className="inline-flex items-center px-3 py-1.5 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                          >
+                      <button
+                        onClick={() => handleCompileNewsletter(issue.id)}
+                        disabled={compilingIssueId === issue.id || isPending}
+                        className="inline-flex items-center px-3 py-1.5 border shadow-sm text-sm font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        style={{ borderColor: '#E5E5E5', color: '#1a1a1a', backgroundColor: '#FFFFFF' }}
+                        onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#FAFAFA')}
+                        onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#FFFFFF')}
+                        onFocus={(e) => e.currentTarget.style.outlineColor = '#5d888e'}
+                      >
                             {compilingIssueId === issue.id ? (
                               <>
                                 <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -251,7 +261,10 @@ export default function AdminDashboard() {
                           <button
                             onClick={() => handleFinalizeAndSend(issue.id)}
                             disabled={isPending}
-                            className="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            className="inline-flex items-center px-3 py-1.5 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                            style={{ backgroundColor: '#10b981' }}
+                            onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#059669')}
+                            onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#10b981')}
                           >
                             Finalize and Send
                           </button>
@@ -267,26 +280,26 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   <div className="mt-2">
-                    <p className="text-xs text-gray-400">ID: {issue.id}</p>
+                    <p className="text-xs" style={{ color: '#999999' }}>ID: {issue.id}</p>
                   </div>
                   {compileResult && compilingIssueId === null && (
-                    <div className="mt-4 p-4 bg-gray-50 rounded-md">
-                      <h4 className="text-sm font-semibold text-gray-900 mb-2">Compiled Newsletter:</h4>
+                    <div className="mt-4 p-4 rounded-md" style={{ backgroundColor: '#FAFAFA', borderRadius: '8px' }}>
+                      <h4 className="text-sm font-semibold mb-2" style={{ color: '#1a1a1a' }}>Compiled Newsletter:</h4>
                       <div className="space-y-3">
                         <div>
-                          <p className="text-xs font-medium text-gray-600 mb-1">Intro:</p>
-                          <p className="text-sm text-gray-800">{compileResult.intro}</p>
+                          <p className="text-xs font-medium mb-1" style={{ color: '#666666' }}>Intro:</p>
+                          <p className="text-sm" style={{ color: '#1a1a1a' }}>{compileResult.intro}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-medium text-gray-600 mb-1">Outro:</p>
-                          <p className="text-sm text-gray-800">{compileResult.outro}</p>
+                          <p className="text-xs font-medium mb-1" style={{ color: '#666666' }}>Outro:</p>
+                          <p className="text-sm" style={{ color: '#1a1a1a' }}>{compileResult.outro}</p>
                         </div>
                         {compileResult.originalSubmissions && (
                           <div>
-                            <p className="text-xs font-medium text-gray-600 mb-1">
+                            <p className="text-xs font-medium mb-1" style={{ color: '#666666' }}>
                               Submissions ({compileResult.originalSubmissions.length}):
                             </p>
-                            <ul className="text-xs text-gray-600 space-y-1">
+                            <ul className="text-xs space-y-1" style={{ color: '#666666' }}>
                               {compileResult.originalSubmissions.map((sub, idx) => (
                                 <li key={idx}>• {sub.name}: {sub.answers.length} answers</li>
                               ))}
@@ -294,7 +307,7 @@ export default function AdminDashboard() {
                           </div>
                         )}
                       </div>
-                      <p className="mt-4 text-xs text-gray-400 italic">
+                      <p className="mt-4 text-xs italic" style={{ color: '#999999' }}>
                         Note that the intro and outro were auto-generated by Claude
                       </p>
                     </div>
