@@ -168,10 +168,13 @@ export default function RespondPage() {
       }
     }
 
-    // Reset input
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
-    }
+    // Reset input after processing
+    // Use setTimeout to ensure the reset happens after the file picker closes on mobile
+    setTimeout(() => {
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }, 100);
   }
 
   function removeImage(preview: string) {
@@ -319,7 +322,7 @@ export default function RespondPage() {
             )}
           </div>
 
-          <form onSubmit={handleSubmit} className="px-6 py-8 space-y-8">
+          <form onSubmit={handleSubmit} className="px-6 py-8 space-y-8" style={{ position: 'relative', zIndex: 1 }}>
             {issue?.questions.map((question, index) => (
               <div key={index}>
                 <label
@@ -401,13 +404,18 @@ export default function RespondPage() {
                     accept="image/jpeg,image/png,image/gif,image/webp"
                     multiple
                     onChange={handleImageSelect}
+                    onClick={(e) => {
+                      // Reset the value so the same file can be selected again if needed
+                      // This also ensures the onChange fires even if user cancels and reopens
+                      e.currentTarget.value = '';
+                    }}
                     className="hidden"
                     id="image-upload"
                   />
                   <label
                     htmlFor="image-upload"
                     className="inline-flex items-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium cursor-pointer"
-                    style={{ borderColor: '#E5E5E5', color: '#1a1a1a', backgroundColor: '#FFFFFF' }}
+                    style={{ borderColor: '#E5E5E5', color: '#1a1a1a', backgroundColor: '#FFFFFF', position: 'relative', zIndex: 1 }}
                     onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#FAFAFA'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#FFFFFF'}
                   >
@@ -433,10 +441,14 @@ export default function RespondPage() {
               type="submit"
               disabled={isPending || !isFormValid() || images.some(img => img.uploading)}
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              style={{ backgroundColor: '#5d888e' }}
+              style={{ backgroundColor: '#5d888e', position: 'relative', zIndex: 10 }}
               onMouseEnter={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#4a6d72')}
               onMouseLeave={(e) => !e.currentTarget.disabled && (e.currentTarget.style.backgroundColor = '#5d888e')}
               onFocus={(e) => e.currentTarget.style.outlineColor = '#5d888e'}
+              onTouchStart={(e) => {
+                // Ensure button is clickable on mobile
+                e.currentTarget.style.zIndex = '100';
+              }}
             >
               {isPending ? (
                 <>

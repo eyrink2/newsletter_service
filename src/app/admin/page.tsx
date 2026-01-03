@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useTransition } from 'react';
-import { startNewIssue, getIssues, getSubscriberCount, compileNewsletter, deleteIssue, finalizeAndSendNewsletter } from './actions';
+import { startNewIssue, getIssues, getSubscriberCount, compileNewsletter, deleteIssue, finalizeAndSendNewsletter, getIssueResponseStatus } from './actions';
 
 interface Issue {
   id: string;
@@ -23,6 +23,13 @@ export default function AdminDashboard() {
     originalSubmissions?: Array<{ name: string; answers: string[]; image_urls: string[] }>;
     error?: string;
   } | null>(null);
+  const [expandedIssueId, setExpandedIssueId] = useState<string | null>(null);
+  const [responseStatuses, setResponseStatuses] = useState<Record<string, {
+    responded: Array<{ id: string; name: string; email: string; submitted_at: string }>;
+    notResponded: Array<{ id: string; name: string; email: string }>;
+    totalSubscribers: number;
+    responseCount: number;
+  } | null>>({});
 
   useEffect(() => {
     loadData();
@@ -35,6 +42,25 @@ export default function AdminDashboard() {
     ]);
     setIssues(issuesData);
     setSubscriberCount(count);
+  }
+
+  async function loadResponseStatus(issueId: string) {
+    const status = await getIssueResponseStatus(issueId);
+    setResponseStatuses(prev => ({
+      ...prev,
+      [issueId]: status
+    }));
+  }
+
+  function toggleIssueExpansion(issueId: string) {
+    if (expandedIssueId === issueId) {
+      setExpandedIssueId(null);
+    } else {
+      setExpandedIssueId(issueId);
+      if (!responseStatuses[issueId]) {
+        loadResponseStatus(issueId);
+      }
+    }
   }
 
   async function handleStartNewIssue() {
@@ -279,9 +305,66 @@ export default function AdminDashboard() {
                       </button>
                     </div>
                   </div>
-                  <div className="mt-2">
+                  <div className="mt-2 flex items-center justify-between">
                     <p className="text-xs" style={{ color: '#999999' }}>ID: {issue.id}</p>
+                    <button
+                      onClick={() => toggleIssueExpansion(issue.id)}
+                      className="text-xs px-2 py-1 rounded"
+                      style={{ color: '#5d888e', backgroundColor: 'transparent' }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f0f0f0'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      {expandedIssueId === issue.id ? 'Hide Responses' : 'View Responses'}
+                    </button>
                   </div>
+                  {expandedIssueId === issue.id && responseStatuses[issue.id] && (
+                    <div className="mt-4 p-4 rounded-md" style={{ backgroundColor: '#FAFAFA', borderRadius: '8px' }}>
+                      <div className="mb-4">
+                        <p className="text-sm font-semibold mb-2" style={{ color: '#1a1a1a' }}>
+                          Response Status: {responseStatuses[issue.id]!.responseCount} / {responseStatuses[issue.id]!.totalSubscribers}
+                        </p>
+                        <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
+                          <div
+                            className="h-2 rounded-full"
+                            style={{
+                              width: `${(responseStatuses[issue.id]!.responseCount / responseStatuses[issue.id]!.totalSubscribers) * 100}%`,
+                              backgroundColor: '#5d888e'
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                      
+                      {responseStatuses[issue.id]!.responded.length > 0 && (
+                        <div className="mb-4">
+                          <p className="text-xs font-semibold mb-2" style={{ color: '#10b981' }}>
+                            Responded ({responseStatuses[issue.id]!.responded.length}):
+                          </p>
+                          <ul className="space-y-1">
+                            {responseStatuses[issue.id]!.responded.map((sub) => (
+                              <li key={sub.id} className="text-xs" style={{ color: '#1a1a1a' }}>
+                                ✓ {sub.name} ({sub.email})
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      
+                      {responseStatuses[issue.id]!.notResponded.length > 0 && (
+                        <div>
+                          <p className="text-xs font-semibold mb-2" style={{ color: '#dc2626' }}>
+                            Not Responded ({responseStatuses[issue.id]!.notResponded.length}):
+                          </p>
+                          <ul className="space-y-1">
+                            {responseStatuses[issue.id]!.notResponded.map((sub) => (
+                              <li key={sub.id} className="text-xs" style={{ color: '#666666' }}>
+                                ○ {sub.name} ({sub.email})
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   {compileResult && compilingIssueId === null && (
                     <div className="mt-4 p-4 rounded-md" style={{ backgroundColor: '#FAFAFA', borderRadius: '8px' }}>
                       <h4 className="text-sm font-semibold mb-2" style={{ color: '#1a1a1a' }}>Compiled Newsletter:</h4>

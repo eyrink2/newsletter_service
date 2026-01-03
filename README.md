@@ -108,9 +108,3 @@ supabase/
 └── migrations/
     └── 001_initial_schema.sql
 ```
-
-## Default Questions (in `src/app/admin/actions.ts`)
-1. "the most beautiful mundane thing to happen to you recently?"
-2. "what are you currently reading, watching, or listening to?"
-3. "what should we be more grateful for? and more hateful of?"
-4. "any upcoming plans or events you'd like to share?"

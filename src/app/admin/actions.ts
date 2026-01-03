@@ -208,6 +208,75 @@ export async function getSubscriberCount() {
   return count || 0;
 }
 
+interface ResponseStatus {
+  responded: Array<{ id: string; name: string; email: string; submitted_at: string }>;
+  notResponded: Array<{ id: string; name: string; email: string }>;
+  totalSubscribers: number;
+  responseCount: number;
+}
+
+export async function getIssueResponseStatus(issueId: string): Promise<ResponseStatus | null> {
+  try {
+    // Get all subscribers
+    const { data: allSubscribers, error: subscribersError } = await supabaseAdmin
+      .from('subscribers')
+      .select('id, name, email');
+
+    if (subscribersError) {
+      console.error('Error fetching subscribers:', subscribersError);
+      return null;
+    }
+
+    // Get all submissions for this issue
+    const { data: submissions, error: submissionsError } = await supabaseAdmin
+      .from('submissions')
+      .select('subscriber_id, submitted_at')
+      .eq('issue_id', issueId);
+
+    if (submissionsError) {
+      console.error('Error fetching submissions:', submissionsError);
+      return null;
+    }
+
+    // Create a set of subscriber IDs who have responded
+    const respondedIds = new Set((submissions || []).map((s: any) => s.subscriber_id));
+    const submissionMap = new Map(
+      (submissions || []).map((s: any) => [s.subscriber_id, s.submitted_at])
+    );
+
+    // Separate into responded and not responded
+    const responded: Array<{ id: string; name: string; email: string; submitted_at: string }> = [];
+    const notResponded: Array<{ id: string; name: string; email: string }> = [];
+
+    (allSubscribers || []).forEach((sub: any) => {
+      if (respondedIds.has(sub.id)) {
+        responded.push({
+          id: sub.id,
+          name: sub.name,
+          email: sub.email,
+          submitted_at: submissionMap.get(sub.id) || ''
+        });
+      } else {
+        notResponded.push({
+          id: sub.id,
+          name: sub.name,
+          email: sub.email
+        });
+      }
+    });
+
+    return {
+      responded,
+      notResponded,
+      totalSubscribers: allSubscribers?.length || 0,
+      responseCount: responded.length
+    };
+  } catch (error) {
+    console.error('Error getting response status:', error);
+    return null;
+  }
+}
+
 interface DeleteIssueResult {
   success: boolean;
   message: string;

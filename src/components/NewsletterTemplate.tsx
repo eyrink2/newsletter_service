@@ -94,6 +94,7 @@ export const NewsletterTemplate: React.FC<NewsletterTemplateProps> = ({
           {/* Footer */}
           <Section style={footerSectionStyle}>
             <Text style={outroStyle}>{outro}</Text>
+            <Text style={disclaimerStyle}>The intro and outro were AI-generated.</Text>
           </Section>
         </Container>
       </Body>
@@ -190,7 +191,7 @@ const questionStyle: React.CSSProperties = {
   fontFamily: 'Georgia',
   fontWeight: 700,
   marginBottom: '8px',
-  textTransform: 'uppercase',
+  textTransform: 'lowercase',
   letterSpacing: '0.5px',
 };
 
@@ -226,6 +227,14 @@ const outroStyle: React.CSSProperties = {
   lineHeight: '1.6',
   fontStyle: 'italic',
   margin: 0,
+  textAlign: 'center',
+};
+
+const disclaimerStyle: React.CSSProperties = {
+  fontSize: '8px',
+  color: '#999999',
+  fontFamily: 'Georgia',
+  margin: '20px 0 0 0',
   textAlign: 'center',
 };
 

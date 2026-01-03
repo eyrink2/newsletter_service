@@ -12,10 +12,8 @@ export default function Home() {
         </p>
         <Link
           href="/admin"
-          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors"
+          className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors hover:opacity-90"
           style={{ backgroundColor: '#5d888e', fontFamily: 'Georgia, serif' }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#4a6d72'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#5d888e'}
         >
           Go to Creator Dashboard
         </Link>
