@@ -2,7 +2,7 @@
 
 import { supabaseAdmin, type Subscriber, type Issue } from '@/lib/supabase';
 
-const BUCKET_NAME = 'newsletter-images';
+const BUCKET_NAME = 'image_collection';
 
 interface ValidateTokenResult {
   valid: boolean;
@@ -182,10 +182,12 @@ export async function uploadImage(
       return { success: false, error: 'Invalid file type. Please upload JPEG, PNG, GIF, or WebP.' };
     }
 
-    // Validate file size (max 5MB)
-    const maxSize = 5 * 1024 * 1024;
+    // Validate file size (max 10MB)
+    const maxSize = 10 * 1024 * 1024;
     if (file.size > maxSize) {
-      return { success: false, error: 'File too large. Maximum size is 5MB.' };
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      const maxMB = (maxSize / (1024 * 1024)).toFixed(0);
+      return { success: false, error: `File too large (${sizeMB}MB). Maximum size is ${maxMB}MB.` };
     }
 
     // Generate unique filename

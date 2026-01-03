@@ -3,13 +3,16 @@
 import { supabaseAdmin, type Issue, type Subscriber, type Submission } from '@/lib/supabase';
 import { resend } from '@/lib/resend';
 import { anthropic } from '@/lib/anthropic';
+import { render } from '@react-email/render';
+import React from 'react';
+import { NewsletterTemplate } from '@/components/NewsletterTemplate';
 
 // Pre-determined questions for each newsletter issue
 const DEFAULT_QUESTIONS = [
-  "the most beautiful mundate thing to happen to you recently?",
+  "the most beautiful mundane thing to happen to you recently?",
   "what are you currently reading, watching, or listening to?",
   "what should we be more grateful for? and more hateful of?",
-  "any upcoming plans or events you'd like to share?"
+  "one convo you’ve had recently that pissed u off"
 ];
 
 interface StartNewIssueResult {
@@ -82,7 +85,7 @@ export async function startNewIssue(): Promise<StartNewIssueResult> {
 
       try {
         const emailResult = await resend.emails.send({
-          from: 'Newsletter <onboarding@resend.dev>',
+          from: 'Newsletter <updates@newsletter.eyrinkim.com>',
           to: subscriber.email,
           subject: "It's time to share your update!",
           html: `
@@ -177,6 +180,40 @@ export async function getSubscriberCount() {
   return count || 0;
 }
 
+interface DeleteIssueResult {
+  success: boolean;
+  message: string;
+}
+
+export async function deleteIssue(issueId: string): Promise<DeleteIssueResult> {
+  try {
+    // Delete the issue (cascade will handle submissions)
+    const { error } = await supabaseAdmin
+      .from('issues')
+      .delete()
+      .eq('id', issueId);
+
+    if (error) {
+      console.error('Error deleting issue:', error);
+      return {
+        success: false,
+        message: `Failed to delete issue: ${error.message}`
+      };
+    }
+
+    return {
+      success: true,
+      message: 'Issue deleted successfully.'
+    };
+  } catch (error) {
+    console.error('Unexpected error in deleteIssue:', error);
+    return {
+      success: false,
+      message: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`
+    };
+  }
+}
+
 interface SubmissionWithName {
   name: string;
   answers: string[];
@@ -248,7 +285,7 @@ export async function compileNewsletter(issueId: string): Promise<CompileNewslet
     // Create the prompt with exact wording from requirements
     const prompt = `I am creating a group newsletter. Here are the updates from ${numPeople} people: ${submissionsJson}
 
-Please write a witty, enthusiastic 2-3 sentence intro and a 1-sentence warm outro. Do not edit the original responses.
+Please write a witty, sharp, funny 2-3 sentence intro and a 1-sentence warm outro based on the content on the response from the collection. Write it the way a columnist from Sex and the City would write - kind and warm but humorous and sharp. Do not edit the original responses.
 
 Format your response as JSON with the following structure:
 {
@@ -258,7 +295,7 @@ Format your response as JSON with the following structure:
 
     // Call Claude API
     const message = await anthropic.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-haiku-4-5-20251001',
       max_tokens: 1024,
       messages: [
         {
@@ -332,6 +369,139 @@ Format your response as JSON with the following structure:
     return {
       success: false,
       error: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`
+    };
+  }
+}
+
+interface FinalizeAndSendResult {
+  success: boolean;
+  message: string;
+  emailsSent?: number;
+}
+
+export async function finalizeAndSendNewsletter(issueId: string): Promise<FinalizeAndSendResult> {
+  try {
+    // 1. Get the issue to access questions and created_at
+    const { data: issue, error: issueError } = await supabaseAdmin
+      .from('issues')
+      .select('*')
+      .eq('id', issueId)
+      .single();
+
+    if (issueError || !issue) {
+      return {
+        success: false,
+        message: `Failed to fetch issue: ${issueError?.message || 'Issue not found'}`
+      };
+    }
+
+    // 2. Trigger compileNewsletter action
+    const compileResult = await compileNewsletter(issueId);
+
+    if (!compileResult.success || !compileResult.intro || !compileResult.outro) {
+      return {
+        success: false,
+        message: compileResult.error || 'Failed to compile newsletter'
+      };
+    }
+
+    // 3. Render NewsletterTemplate to HTML
+    const issueDate = new Date(issue.created_at);
+    const month = issueDate.getMonth() + 1; // getMonth() returns 0-11
+    const day = issueDate.getDate();
+    const formattedDate = `${month}/${day}`;
+
+    const html = await render(
+      React.createElement(NewsletterTemplate, {
+        date: formattedDate,
+        intro: compileResult.intro,
+        outro: compileResult.outro,
+        submissions: compileResult.originalSubmissions || [],
+        questions: issue.questions,
+      })
+    );
+
+    // 4. Fetch all subscribers
+    const { data: subscribers, error: subscribersError } = await supabaseAdmin
+      .from('subscribers')
+      .select('*');
+
+    if (subscribersError) {
+      return {
+        success: false,
+        message: `Failed to fetch subscribers: ${subscribersError.message}`
+      };
+    }
+
+    const subscriberList = subscribers as Subscriber[];
+
+    if (subscriberList.length === 0) {
+      return {
+        success: false,
+        message: 'No subscribers found to send newsletter to.'
+      };
+    }
+
+    // 5. Send email to all subscribers via Resend
+    let emailsSent = 0;
+    const emailErrors: string[] = [];
+
+    for (const subscriber of subscriberList) {
+      try {
+        const emailResult = await resend.emails.send({
+          from: 'Newsletter <updates@newsletter.eyrinkim.com>',
+          to: subscriber.email,
+          subject: `Newsletter Update ${formattedDate} 💌`,
+          html: html,
+        });
+
+        if (emailResult.error) {
+          console.error(`Resend API error for ${subscriber.email}:`, emailResult.error);
+          emailErrors.push(`${subscriber.email}: ${emailResult.error.message || 'Unknown error'}`);
+        } else {
+          console.log(`Newsletter sent successfully to ${subscriber.email}, ID: ${emailResult.data?.id}`);
+          emailsSent++;
+        }
+      } catch (emailError) {
+        const errorMessage = emailError instanceof Error ? emailError.message : String(emailError);
+        console.error(`Failed to send newsletter to ${subscriber.email}:`, errorMessage);
+        emailErrors.push(`${subscriber.email}: ${errorMessage}`);
+      }
+    }
+
+    // 6. Update issue.status to 'sent'
+    const { error: updateError } = await supabaseAdmin
+      .from('issues')
+      .update({ status: 'sent' })
+      .eq('id', issueId);
+
+    if (updateError) {
+      console.error('Error updating issue status:', updateError);
+      return {
+        success: true,
+        message: `Newsletter sent to ${emailsSent}/${subscriberList.length} subscribers, but failed to update status: ${updateError.message}`,
+        emailsSent
+      };
+    }
+
+    if (emailErrors.length > 0) {
+      return {
+        success: true,
+        message: `Newsletter sent to ${emailsSent}/${subscriberList.length} subscribers. Failed: ${emailErrors.join(', ')}`,
+        emailsSent
+      };
+    }
+
+    return {
+      success: true,
+      message: `Newsletter finalized and sent successfully to ${emailsSent} subscribers!`,
+      emailsSent
+    };
+  } catch (error) {
+    console.error('Unexpected error in finalizeAndSendNewsletter:', error);
+    return {
+      success: false,
+      message: `An unexpected error occurred: ${error instanceof Error ? error.message : 'Unknown error'}`
     };
   }
 }

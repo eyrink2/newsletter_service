@@ -29,6 +29,7 @@ interface UploadedImage {
 const MAX_IMAGES = 3;
 const MIN_LENGTH = 50; // ~2 sentences
 const MAX_LENGTH = 500; // ~5 sentences
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB (increased from 5MB)
 
 export default function RespondPage() {
   const params = useParams();
@@ -98,7 +99,43 @@ export default function RespondPage() {
     const remainingSlots = MAX_IMAGES - images.length;
     const filesToAdd = Array.from(files).slice(0, remainingSlots);
 
+    // Validate files before uploading
+    const validFiles: File[] = [];
+    const invalidFiles: { name: string; reason: string }[] = [];
+
     for (const file of filesToAdd) {
+      // Check file size
+      if (file.size > MAX_FILE_SIZE) {
+        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+        const maxMB = (MAX_FILE_SIZE / (1024 * 1024)).toFixed(0);
+        invalidFiles.push({
+          name: file.name,
+          reason: `File too large (${sizeMB}MB). Maximum size is ${maxMB}MB.`
+        });
+        continue;
+      }
+
+      // Check file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        invalidFiles.push({
+          name: file.name,
+          reason: 'Invalid file type. Please upload JPEG, PNG, GIF, or WebP.'
+        });
+        continue;
+      }
+
+      validFiles.push(file);
+    }
+
+    // Show errors for invalid files
+    if (invalidFiles.length > 0) {
+      const errorMessages = invalidFiles.map(f => `${f.name}: ${f.reason}`).join('\n');
+      alert(`Some files were rejected:\n\n${errorMessages}`);
+    }
+
+    // Upload valid files
+    for (const file of validFiles) {
       // Create preview
       const preview = URL.createObjectURL(file);
       const newImage: UploadedImage = {
@@ -113,13 +150,22 @@ export default function RespondPage() {
       const formData = new FormData();
       formData.append('file', file);
 
-      const result = await uploadImage(formData, subscriber.id, issueId);
+      try {
+        const result = await uploadImage(formData, subscriber.id, issueId);
 
-      setImages(prev => prev.map(img =>
-        img.preview === preview
-          ? { ...img, uploading: false, url: result.url, error: result.error }
-          : img
-      ));
+        setImages(prev => prev.map(img =>
+          img.preview === preview
+            ? { ...img, uploading: false, url: result.url, error: result.error }
+            : img
+        ));
+      } catch (error) {
+        // Handle unexpected errors
+        setImages(prev => prev.map(img =>
+          img.preview === preview
+            ? { ...img, uploading: false, error: 'Upload failed. Please try again.' }
+            : img
+        ));
+      }
     }
 
     // Reset input
@@ -364,7 +410,7 @@ export default function RespondPage() {
                     Add Photos
                   </label>
                   <p className="mt-2 text-xs text-gray-500">
-                    JPEG, PNG, GIF, or WebP. Max 5MB each.
+                    JPEG, PNG, GIF, or WebP. Max 10MB each.
                   </p>
                 </div>
               )}
